@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">LunchList</string>
+    <string name="lbl_address">Dirección</string>
+</resources>
