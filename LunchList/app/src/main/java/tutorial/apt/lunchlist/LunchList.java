@@ -1,8 +1,14 @@
 package tutorial.apt.lunchlist;
+
+import android.app.ListActivity;
 import android.app.TabActivity;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
@@ -19,7 +25,7 @@ import android.widget.TextView;
 import tutorial.apt.lunchlist.R;
 import tutorial.apt.lunchlist.RestaurantHelper;
 
-public class LunchList extends TabActivity {
+public class LunchList extends ListActivity {
     Cursor model = null;
     RestaurantAdapter adapter = null;
     EditText name = null;
@@ -27,35 +33,18 @@ public class LunchList extends TabActivity {
     EditText notes = null;
     RadioGroup types = null;
     RestaurantHelper helper = null;
+    public final static String ID_EXTRA="apt.tutorial.apt.lunchlist._ID";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lunch_list);
-        helper = new RestaurantHelper(this);
-        name = (EditText) findViewById(R.id.name);
-        address = (EditText) findViewById(R.id.addr);
-        notes = (EditText) findViewById(R.id.notes);
-        types = (RadioGroup) findViewById(R.id.types);
-        Button save = (Button) findViewById(R.id.save);
-        save.setOnClickListener(onSave);
-        ListView list = (ListView) findViewById(R.id.restaurants);
-        model = helper.getAll();
+
+        helper=new RestaurantHelper(this);
+        model=helper.getAll();
         startManagingCursor(model);
         adapter = new RestaurantAdapter(model);
-        list.setAdapter(adapter);
-        TabHost.TabSpec spec = getTabHost().newTabSpec("tag1");
-        spec.setContent(R.id.restaurants);
-        spec.setIndicator("", getResources()
-                .getDrawable(R.drawable.list));
-        getTabHost().addTab(spec);
-        spec = getTabHost().newTabSpec("tag2");
-        spec.setContent(R.id.details);
-        spec.setIndicator("", getResources()
-                .getDrawable(R.drawable.restaurant));
-        getTabHost().addTab(spec);
-        getTabHost().setCurrentTab(0);
-        list.setOnItemClickListener(onListClick);
+        setListAdapter(adapter);
     }
 
     @Override
@@ -84,25 +73,23 @@ public class LunchList extends TabActivity {
             model.requery();
         }
     };
-    private AdapterView.OnItemClickListener onListClick = new
+    /*private AdapterView.OnItemClickListener onListClick = new
             AdapterView.OnItemClickListener() {
                 public void onItemClick(AdapterView<?> parent,
                                         View view, int position,
                                         long id) {
-                    model.moveToPosition(position);
-                    name.setText(helper.getName(model));
-                    address.setText(helper.getAddress(model));
-                    notes.setText(helper.getNotes(model));
-                    if (helper.getType(model).equals("sit_down")) {
-                        types.check(R.id.sit_down);
-                    } else if (helper.getType(model).equals("take_out")) {
-                        types.check(R.id.take_out);
-                    } else {
-                        types.check(R.id.delivery);
-                    }
-                    getTabHost().setCurrentTab(1);
+
+                    Intent i=new Intent(LunchList.this, DetailForm.class);
+                    startActivity(i);
                 }
-            };
+            };*/
+    @Override
+    public void onListItemClick(ListView list, View view,
+                                int position, long id) {
+        Intent i=new Intent(LunchList.this, DetailForm.class);
+        i.putExtra(ID_EXTRA, String.valueOf(id));
+        startActivity(i);
+    }
 
     class RestaurantAdapter extends CursorAdapter {
         RestaurantAdapter(Cursor c) {
@@ -125,6 +112,21 @@ public class LunchList extends TabActivity {
             row.setTag(holder);
             return (row);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        new MenuInflater(this).inflate(R.menu.option, menu);
+        return(super.onCreateOptionsMenu(menu));
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId()==R.id.add) {
+            startActivity(new Intent(LunchList.this, DetailForm.class));
+            return(true);
+        }
+        return(super.onOptionsItemSelected(item));
     }
 
     static class RestaurantHolder {
