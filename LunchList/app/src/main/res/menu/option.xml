@@ -3,4 +3,8 @@
     <item android:id="@+id/add"
         android:title="Add"
         android:icon="@android:drawable/ic_menu_add"/>
+    <item android:id="@+id/prefs"
+        android:title="Settings"
+        android:icon="@android:drawable/ic_menu_preferences"
+        />
 </menu>
