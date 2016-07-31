@@ -91,7 +91,7 @@ public class LunchList extends ListActivity {
             }
             helper.insert(name.getText().toString(),
                     address.getText().toString(), type,
-                    notes.getText().toString());
+                    notes.getText().toString(),null);//prefs.getString("feed","feed")
             model.requery();
         }
     };

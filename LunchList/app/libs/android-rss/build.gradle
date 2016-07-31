@@ -1,0 +1,11 @@
+configurations.create("default")
+artifacts.add("default", file('android-rss.jar'))
+dependencies {
+    apply plugin: 'jdepend'
+    apply plugin: 'idea'
+    apply plugin: 'announce'
+    apply plugin: 'pmd'
+    apply plugin: 'eclipse-wtp'
+    apply plugin: 'build-announcements'
+    compile files('android-rss.jar')
+}

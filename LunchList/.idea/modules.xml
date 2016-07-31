@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/LunchList.iml" filepath="$PROJECT_DIR$/LunchList.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android-rss/android-rss.iml" filepath="$PROJECT_DIR$/android-rss/android-rss.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
