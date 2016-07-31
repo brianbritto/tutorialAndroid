@@ -35,7 +35,7 @@ public class LunchList extends ListActivity {
     EditText notes = null;
     RadioGroup types = null;
     RestaurantHelper helper = null;
-    public final static String ID_EXTRA="apt.tutorial.apt.lunchlist._ID";
+    public final static String ID_EXTRA="tutorial.apt.lunchlist._ID";
     SharedPreferences prefs =  null;
 
     @Override

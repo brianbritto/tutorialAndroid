@@ -2,36 +2,38 @@ package tutorial.apt.lunchlist;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.os.AsyncTask;
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Messenger;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
-
-import org.mcsoxford.rss.RSSFeed;
 import org.mcsoxford.rss.RSSItem;
-import org.mcsoxford.rss.RSSReader;
-
-public class FeedActivity extends ListActivity{
-
+import org.mcsoxford.rss.RSSFeed;
+public class FeedActivity extends ListActivity {
+    public static final String FEED_URL="tutorial.apt.lunchlist.FEED_URL";
     private InstanceState state=null;
-    public static final String FEED_URL="apt.tutorial.FEED_URL";
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         state=(InstanceState)getLastNonConfigurationInstance();
         if (state==null) {
             state=new InstanceState();
-            state.task=new FeedTask(this);
-            state.task.execute(getIntent().getStringExtra(FEED_URL));
+            state.handler=new FeedHandler(this);
+            Intent i=new Intent(this, FeedService.class);
+            i.putExtra(FeedService.EXTRA_URL,
+                    getIntent().getStringExtra(FEED_URL));
+            i.putExtra(FeedService.EXTRA_MESSENGER,
+                    new Messenger(state.handler));
+            startService(i);
         }
         else {
-            if (state.task!=null) {
-                state.task.attach(this);
+            if (state.handler!=null) {
+                state.handler.attach(this);
             }
             if (state.feed!=null) {
                 setFeed(state.feed);
@@ -40,8 +42,8 @@ public class FeedActivity extends ListActivity{
     }
     @Override
     public Object onRetainNonConfigurationInstance() {
-        if (state.task!=null) {
-            state.task.detach();
+        if (state.handler!=null) {
+            state.handler.detach();
         }
         return(state);
     }
@@ -49,51 +51,7 @@ public class FeedActivity extends ListActivity{
         state.feed=feed;
         setListAdapter(new FeedAdapter(feed));
     }
-
-    private static class FeedTask extends AsyncTask<String, Void, RSSFeed> {
-        private RSSReader reader=new RSSReader();
-        private Exception e=null;
-        private FeedActivity activity=null;
-
-        FeedTask(FeedActivity activity) {
-            attach(activity);
-        }
-        void attach(FeedActivity activity) {
-            this.activity=activity;
-        }
-        void detach() {
-            this.activity=null;
-        }
-        @Override
-        public RSSFeed doInBackground(String... urls) {
-            RSSFeed result=null;
-            try {
-                result=reader.load(urls[0]);
-            }
-            catch (Exception e) {
-                this.e=e;
-            }
-            return(result);
-        }
-
-        @Override
-        public void onPostExecute(RSSFeed feed) {
-            if (e==null) {
-                activity.setFeed(feed);
-            }
-            else {
-                Log.e("LunchList", "Exception parsing feed", e);
-                activity.goBlooey(e);
-            }
-        }
-    }
-
-    private static class InstanceState {
-        RSSFeed feed=null;
-        FeedTask task=null;
-    }
-
-   private void goBlooey(Throwable t) {
+    private void goBlooey(Throwable t) {
         AlertDialog.Builder builder=new AlertDialog.Builder(this);
         builder
                 .setTitle("Exception!")
@@ -101,7 +59,10 @@ public class FeedActivity extends ListActivity{
                 .setPositiveButton("OK", null)
                 .show();
     }
-
+    private static class InstanceState {
+        RSSFeed feed=null;
+        FeedHandler handler=null;
+    }
     private class FeedAdapter extends BaseAdapter {
         RSSFeed feed=null;
         FeedAdapter(RSSFeed feed) {
@@ -134,8 +95,25 @@ public class FeedActivity extends ListActivity{
             return(row);
         }
     }
+    private static class FeedHandler extends Handler {
+        FeedActivity activity=null;
+        FeedHandler(FeedActivity activity) {
+            attach(activity);
+        }
+        void attach(FeedActivity activity) {
+            this.activity=activity;
+        }
+        void detach() {
+            this.activity=null;
+        }
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.arg1==RESULT_OK) {
+                activity.setFeed((RSSFeed)msg.obj);
+            }
+            else {
+                activity.goBlooey((Exception)msg.obj);
+            }
+        }
+    }
 }
-
-
-
-
