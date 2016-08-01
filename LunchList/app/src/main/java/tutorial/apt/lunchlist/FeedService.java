@@ -6,26 +6,28 @@ import android.content.Intent;
 import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
-
+import org.mcsoxford.rss.RSSItem;
 import org.mcsoxford.rss.RSSFeed;
 import org.mcsoxford.rss.RSSReader;
 
-public class FeedService extends IntentService{
-
+public class FeedService extends IntentService {
     public static final String EXTRA_URL="tutorial.apt.lunchlist.EXTRA_URL";
     public static final String EXTRA_MESSENGER="tutorial.apt.lunchlist.EXTRA_MESSENGER";
 
     public FeedService() {
         super("FeedService");
     }
+
     @Override
     public void onHandleIntent(Intent i) {
         RSSReader reader=new RSSReader();
         Messenger messenger=(Messenger)i.getExtras().get(EXTRA_MESSENGER);
         Message msg=Message.obtain();
+
         try {
             RSSFeed result=reader.load(i.getStringExtra(EXTRA_URL));
-            msg.arg1= Activity.RESULT_OK;
+
+            msg.arg1=Activity.RESULT_OK;
             msg.obj=result;
         }
         catch (Exception e) {
@@ -33,6 +35,7 @@ public class FeedService extends IntentService{
             msg.arg1=Activity.RESULT_CANCELED;
             msg.obj=e;
         }
+
         try {
             messenger.send(msg);
         }
